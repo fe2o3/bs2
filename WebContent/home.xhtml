@@ -1,0 +1,102 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:s="http://jboss.com/products/seam/taglib"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:a4j="http://richfaces.org/a4j"
+    xmlns:rich="http://richfaces.org/rich"
+    template="layout/template.xhtml">
+
+    <ui:define name="body">
+
+		<a4j:form>
+			<a4j:jsFunction name="refreshScreenComponents5sec" reRender="opponents,invitation,roomList,timerFiveSec">
+			</a4j:jsFunction>
+		</a4j:form>
+		
+		
+		
+		
+		<a4j:form id="theForm">
+       		<h:outputText value="Choose an opponent and start a game"/>
+       		<h:selectManyCheckbox value="#{homeBean.selectedUsers}" id="opponents">
+       			<s:selectItems  value="#{homeBean.availableUsers}" var="u" label="#{u}" />
+       		</h:selectManyCheckbox>
+      			
+      		<h:commandButton value="Invite Selected Opponents to Game" action="#{homeBean.inviteToBS()}"/>
+      			
+      	</a4j:form>
+      	
+		<s:div id="invitation" >
+			<a4j:form >
+			<s:div rendered="#{!empty homeBean.lobbies}">
+			You have been invited to a room	
+				<h:dataTable value="#{homeBean.lobbies}" var="lobby">
+					
+					<h:column>
+						<f:facet name="header" >
+							<h:outputText value="Game Type"/>
+						</f:facet>
+						#{lobby.destination.name}
+					</h:column>
+					<h:column>
+						<f:facet name="header" >
+							<h:outputText value="Host"/>
+						</f:facet>
+						#{lobby.hostUsername}
+					</h:column>
+					<h:column>
+						<f:facet name="header" >
+							<h:outputText value="Ready?"/>
+						</f:facet>
+						<a4j:commandLink value="Set Ready"
+							rendered="#{!lobby.getReady(userBean.user.username)}"
+							reRender="invitation"
+							 action="#{homeBean.setReady(lobby)}"/>
+						<h:outputText value="Yes" rendered="#{lobby.getReady(userBean.user.username)}" />
+					</h:column>
+					<h:column>
+						<f:facet name="header" >
+							<h:outputText value="Other Players"/>
+						</f:facet>
+						#{lobby.listMembers()}
+					</h:column>
+					<h:column>
+						<f:facet name="header" >
+							<h:outputText value="Players Ready"/>
+						</f:facet>
+						#{lobby.readyCount}/#{lobby.listMembers().size()}
+					</h:column>
+					<h:column>
+						
+						<h:commandLink value="Decline" action="#{homeBean.quitGame(lobby)}"/>
+					</h:column>
+				</h:dataTable>
+				
+			</s:div>
+			</a4j:form>
+		</s:div>
+		<s:div id="roomList">
+			<a4j:form>
+			<h:dataTable value="#{homeBean.games}" var="game">
+				<h:column>
+					#{game.roomType()} #{game.id}
+				</h:column>
+				<h:column>
+					<h:commandLink value="Go To Room" action="#{homeBean.goToGame(game)}"/>		
+				</h:column>
+				<h:column>
+					<h:commandLink value="Quit Game" action="#{homeBean.quitGame(game)}"/>		
+				</h:column>
+				<h:column>
+					<h:outputText value="#{game.winner} is the winner." rendered="#{!empty game.winner}"/>
+					
+				</h:column>
+			</h:dataTable>
+			
+			</a4j:form>
+		</s:div>
+    </ui:define>
+</ui:composition>
